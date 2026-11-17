@@ -1,0 +1,247 @@
+{
+ "_nota": "Modelos calificados a mano. razonamiento = GPQA Diamond / 100 (preguntas de ciencia de nivel posgrado) según la fuente indicada; 'estimado' = sin dato publicado, verificar. velocidad es aproximada. La disponibilidad y el contexto real se consultan en vivo; los modelos que un proveedor ofrezca y no estén aquí se agregan solos como 'sin calificar' (razonamiento 0.5). Revisado el 16-11-2026. precio_entrada/precio_salida = USD por 1M tokens del mismo modelo en su versión de pago (OpenRouter, consultado el 16-11-2026): es lo que pagaría una institución; con claves gratuitas el estudiante paga $0.",
+ "modelos": [
+  {
+   "proveedor": "ovh",
+   "id": "gpt-oss-120b",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.8,
+   "velocidad": 0.55,
+   "fuente": "OpenAI, model card gpt-oss (GPQA ~80 %)",
+   "precio_entrada": 0.15,
+   "precio_salida": 0.6
+  },
+  {
+   "proveedor": "ovh",
+   "id": "gpt-oss-20b",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.71,
+   "velocidad": 0.7,
+   "fuente": "OpenAI, model card gpt-oss (GPQA ~71 %)",
+   "precio_entrada": 0.075,
+   "precio_salida": 0.3
+  },
+  {
+   "proveedor": "ovh",
+   "id": "Qwen3.5-397B-A17B",
+   "contexto": 262144,
+   "gratis": true,
+   "razonamiento": 0.85,
+   "velocidad": 0.4,
+   "fuente": "estimado",
+   "precio_entrada": 0.45,
+   "precio_salida": 3.0
+  },
+  {
+   "proveedor": "ovh",
+   "id": "Meta-Llama-3_3-70B-Instruct",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.5,
+   "velocidad": 0.55,
+   "fuente": "Meta, model card Llama 3.3 (GPQA ~50 %)",
+   "precio_entrada": 0.71,
+   "precio_salida": 0.71
+  },
+  {
+   "proveedor": "ovh",
+   "id": "Mistral-Small-3.2-24B-Instruct-2506",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.46,
+   "velocidad": 0.65,
+   "fuente": "estimado",
+   "precio_entrada": 0.1,
+   "precio_salida": 0.3
+  },
+  {
+   "proveedor": "gemini",
+   "id": "gemini-3.5-flash",
+   "contexto": 1048576,
+   "gratis": true,
+   "razonamiento": 0.92,
+   "velocidad": 0.7,
+   "fuente": "datalearner.com / epoch.ai (GPQA ~92.8 %)",
+   "precio_entrada": 1.5,
+   "precio_salida": 9.0
+  },
+  {
+   "proveedor": "gemini",
+   "id": "gemini-3.5-flash-lite",
+   "contexto": 1048576,
+   "gratis": true,
+   "razonamiento": 0.8,
+   "velocidad": 0.95,
+   "fuente": "estimado",
+   "precio_entrada": 0.3,
+   "precio_salida": 2.5
+  },
+  {
+   "proveedor": "gemini",
+   "id": "gemma-4-31b-it",
+   "contexto": 262144,
+   "gratis": true,
+   "razonamiento": 0.84,
+   "velocidad": 0.55,
+   "fuente": "Gemma 4 Technical Report (GPQA 84.3 %, AIME 2026 89.2 %)",
+   "precio_entrada": 0.2,
+   "precio_salida": 0.4
+  },
+  {
+   "proveedor": "gemini",
+   "id": "gemma-4-26b-a4b-it",
+   "contexto": 262144,
+   "gratis": true,
+   "razonamiento": 0.82,
+   "velocidad": 0.75,
+   "fuente": "Gemma 4 Technical Report (GPQA 82.3 %)",
+   "precio_entrada": 0.076,
+   "precio_salida": 0.255
+  },
+  {
+   "proveedor": "nvidia",
+   "id": "deepseek-ai/deepseek-v4.1-flash",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.9,
+   "velocidad": 0.6,
+   "fuente": "vals.ai / datalearner.com (GPQA 90.9 %)",
+   "precio_entrada": 0.14,
+   "precio_salida": 0.42
+  },
+  {
+   "proveedor": "nvidia",
+   "id": "nvidia/nemotron-3-ultra-550b-a55b",
+   "contexto": 1000000,
+   "gratis": true,
+   "razonamiento": 0.87,
+   "velocidad": 0.45,
+   "fuente": "benchlm.ai (GPQA ~87 %)",
+   "precio_entrada": 0.6,
+   "precio_salida": 2.4
+  },
+  {
+   "proveedor": "nvidia",
+   "id": "google/gemma-4-31b-it",
+   "contexto": 262144,
+   "gratis": true,
+   "razonamiento": 0.84,
+   "velocidad": 0.6,
+   "fuente": "Gemma 4 Technical Report (GPQA 84.3 %)",
+   "precio_entrada": 0.2,
+   "precio_salida": 0.4
+  },
+  {
+   "proveedor": "nvidia",
+   "id": "z-ai/glm-5.3-flash",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.8,
+   "velocidad": 0.75,
+   "fuente": "estimado (GLM-5.3 completo: GPQA 88.1 %)",
+   "precio_entrada": 0.04,
+   "precio_salida": 0.078
+  },
+  {
+   "proveedor": "nvidia",
+   "id": "mistralai/mistral-large-4-1t-a52b",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.8,
+   "velocidad": 0.45,
+   "fuente": "estimado",
+   "precio_entrada": 0.7,
+   "precio_salida": 2.1
+  },
+  {
+   "proveedor": "nvidia",
+   "id": "minimaxai/minimax-m3.1-flash",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.8,
+   "velocidad": 0.7,
+   "fuente": "estimado",
+   "precio_entrada": 0.075,
+   "precio_salida": 0.3
+  },
+  {
+   "proveedor": "nvidia",
+   "id": "openai/gpt-oss-20b",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.71,
+   "velocidad": 0.75,
+   "fuente": "OpenAI, model card gpt-oss (GPQA ~71 %)",
+   "precio_entrada": 0.075,
+   "precio_salida": 0.3
+  },
+  {
+   "proveedor": "openrouter",
+   "id": "google/gemma-4-31b-it:free",
+   "contexto": 262144,
+   "gratis": true,
+   "razonamiento": 0.84,
+   "velocidad": 0.5,
+   "fuente": "Gemma 4 Technical Report (GPQA 84.3 %)",
+   "precio_entrada": 0.2,
+   "precio_salida": 0.4
+  },
+  {
+   "proveedor": "openrouter",
+   "id": "nvidia/nemotron-3-ultra-550b-a55b:free",
+   "contexto": 1000000,
+   "gratis": true,
+   "razonamiento": 0.87,
+   "velocidad": 0.4,
+   "fuente": "benchlm.ai (GPQA ~87 %)",
+   "precio_entrada": 0.6,
+   "precio_salida": 2.4
+  },
+  {
+   "proveedor": "groq",
+   "id": "openai/gpt-oss-120b",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.8,
+   "velocidad": 0.95,
+   "fuente": "OpenAI, model card gpt-oss (GPQA ~80 %)",
+   "precio_entrada": 0.15,
+   "precio_salida": 0.6
+  },
+  {
+   "proveedor": "cerebras",
+   "id": "gpt-oss-120b",
+   "contexto": 131072,
+   "gratis": true,
+   "razonamiento": 0.8,
+   "velocidad": 1.0,
+   "fuente": "OpenAI, model card gpt-oss (GPQA ~80 %)",
+   "precio_entrada": 0.15,
+   "precio_salida": 0.6
+  },
+  {
+   "proveedor": "deepseek",
+   "id": "deepseek-chat",
+   "contexto": 131072,
+   "gratis": false,
+   "razonamiento": 0.88,
+   "velocidad": 0.6,
+   "fuente": "estimado (de pago)",
+   "precio_entrada": 0.257,
+   "precio_salida": 1.029
+  },
+  {
+   "proveedor": "deepseek",
+   "id": "deepseek-reasoner",
+   "contexto": 131072,
+   "gratis": false,
+   "razonamiento": 0.9,
+   "velocidad": 0.35,
+   "fuente": "estimado (de pago)",
+   "precio_entrada": 0.111,
+   "precio_salida": 4.44
+  }
+ ]
+}

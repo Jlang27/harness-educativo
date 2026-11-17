@@ -1,0 +1,20 @@
+build/
+datos/
+__pycache__/
+*.spec
+dist/datos/
+dist/*
+!dist/HarnessEducativo.exe
+# Archivos intermedios de LaTeX (los PDF sí se suben)
+documento/*.aux
+documento/*.bbl
+documento/*.bcf
+documento/*.blg
+documento/*.log
+documento/*.out
+documento/*.run.xml
+documento/*.nav
+documento/*.snm
+documento/*.toc
+documento/*.zip
+documento/*.synctex.gz

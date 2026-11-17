@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harness Educativo</title>
+<!-- Markdown y fórmulas. Si no hay internet, los mensajes se muestran como texto plano. -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+/* Negro y rojo. Oscuro por defecto; el botón ◐ cambia a la variante clara. */
+:root {
+  --bg: #08080a; --panel: #0e0d10; --card: #151417; --line: #2c1a1d; --hover: #1e1214;
+  --text: #f4eeee; --muted: #9b8c8e; --accent: #e5192d; --accent-2: #ff4d5e; --accent-deep: #6e0913; --accent-soft: rgba(229,25,45,.15);
+  --ok: #4ade80; --ok-soft: rgba(74,222,128,.12); --bad: #ff6b6b; --bad-soft: rgba(255,80,80,.14); --warn: #fbbf24; --warn-soft: rgba(251,191,36,.12);
+  --user: linear-gradient(135deg, #7d0b18, #d0142b); --lateral: linear-gradient(180deg, #0e0d10 55%, #1d080c);
+  --shadow: 0 4px 24px rgba(0,0,0,.55); --glow: 0 0 0 1px rgba(229,25,45,.45), 0 0 26px rgba(229,25,45,.28);
+  --halo: rgba(229,25,45,.13);
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #fbf7f7; --panel: #f4eaeb; --card: #ffffff; --line: #ecd5d8; --hover: #f8e3e6;
+  --text: #140c0d; --muted: #7a6466; --accent: #c8102e; --accent-2: #e5192d; --accent-deep: #4a050c; --accent-soft: rgba(200,16,46,.09);
+  --ok: #1f7a3d; --ok-soft: #e3f3e8; --bad: #b3202a; --bad-soft: #fbe3e5; --warn: #8a5a00; --warn-soft: #fbf0d6;
+  --user: linear-gradient(135deg, #160809, #4a0b14); --lateral: linear-gradient(180deg, #f4eaeb 55%, #f1d6da);
+  --shadow: 0 2px 14px rgba(60,0,8,.08); --glow: 0 0 0 1px rgba(200,16,46,.4), 0 0 22px rgba(200,16,46,.15);
+  --halo: rgba(200,16,46,.07);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: radial-gradient(1100px 600px at 75% -15%, var(--halo), transparent 70%), var(--bg); color: var(--text); font: 15px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif; display: flex; overflow: hidden; }
+::selection { background: var(--accent); color: #fff; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.serif { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* Animaciones */
+@property --ang { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes girar { to { --ang: 360deg; } }
+@keyframes brillo { to { background-position: 200% center; } }
+@keyframes latido { 0%, 100% { box-shadow: 0 0 0 0 rgba(229,25,45,.55); } 50% { box-shadow: 0 0 0 9px rgba(229,25,45,0); } }
+@keyframes entrar { from { opacity: 0; transform: translateY(10px); } }
+@keyframes trazar { 0% { stroke-dashoffset: 1; opacity: 0; } 8% { opacity: 1; } 35%, 70% { stroke-dashoffset: 0; opacity: 1; } 90%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes encender { 0%, 30% { fill: var(--card); stroke: var(--muted); } 40%, 70% { fill: var(--accent); stroke: var(--accent); } 90%, 100% { fill: var(--card); stroke: var(--muted); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* Barra lateral */
+aside { width: 272px; flex: none; background: var(--lateral); border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 14px 10px; gap: 8px; transition: margin .2s; }
+aside.oculta { margin-left: -272px; }
+.marca { display: flex; align-items: center; gap: 10px; padding: 4px 8px 10px; }
+.marca .logo { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--accent-2), var(--accent-deep)); color: #fff; display: grid; place-items: center; font-weight: 700; animation: latido 2.6s ease-in-out infinite; }
+.marca b { font-size: 16px; }
+.btn-nuevo { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 9px 12px; font-weight: 600; box-shadow: var(--shadow); transition: box-shadow .2s, border-color .2s; }
+.btn-nuevo:hover { border-color: var(--accent); box-shadow: var(--glow); }
+.seccion { font-size: 12px; color: var(--muted); padding: 10px 10px 2px; text-transform: uppercase; letter-spacing: .04em; }
+#lista { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
+.item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; cursor: pointer; color: var(--muted); }
+.item:hover { background: var(--hover); color: var(--text); }
+.item.activo { background: var(--accent-soft); color: var(--text); font-weight: 600; box-shadow: inset 3px 0 0 var(--accent); }
+.item .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .borrar { opacity: 0; border: 0; background: none; color: var(--muted); padding: 0 4px; border-radius: 4px; }
+.item:hover .borrar { opacity: 1; }
+.item .borrar:hover { color: var(--bad); }
+.vacio { color: var(--muted); font-size: 13px; padding: 8px 10px; }
+.pie { border-top: 1px solid var(--line); padding-top: 8px; display: flex; gap: 6px; }
+.pie button { flex: 1; display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 8px 10px; border-radius: 8px; }
+.pie button:hover { background: var(--hover); }
+.punto { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.punto.ok { background: var(--ok); } .punto.bad { background: var(--bad); }
+
+/* Zona principal */
+main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+header { height: 52px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 14px; }
+.icono { border: 0; background: none; width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); }
+.icono:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+#titulo { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pastilla { font-size: 12px; padding: 3px 10px; border-radius: 99px; background: linear-gradient(90deg, var(--accent-deep), var(--accent), var(--accent-deep)); background-size: 200% auto; animation: brillo 5s linear infinite; color: #fff; font-weight: 600; white-space: nowrap; max-width: 45%; overflow: hidden; text-overflow: ellipsis; }
+#scroll { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.columna { max-width: 760px; margin: 0 auto; padding: 8px 20px 24px; }
+
+/* Pantalla de inicio */
+#inicio { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4vh 0 2vh; text-align: center; animation: entrar .5s ease both; }
+/* Grafo bipartito animado: tareas (izq.) -> modelos (der.). Es literalmente cómo decide el harness. */
+.grafo { width: 220px; height: 74px; margin-bottom: 18px; overflow: visible; }
+.grafo line { stroke: var(--line); stroke-width: 1; }
+.grafo .ruta { stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: trazar 7.5s ease-in-out infinite; filter: drop-shadow(0 0 3px var(--accent)); }
+.grafo circle { fill: var(--card); stroke: var(--muted); stroke-width: 1.3; }
+.grafo .tarea-n { transition: fill .3s, stroke .3s; }
+.grafo .tarea-n.on { fill: var(--accent); stroke: var(--accent); }
+.grafo .meta-n { animation: encender 7.5s ease-in-out infinite; }
+#inicio h1 { font-size: 38px; margin: 0 0 4px; background: linear-gradient(90deg, var(--text) 30%, var(--accent-2) 45%, var(--accent) 50%, var(--text) 65%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: brillo 8s linear infinite; }
+#inicio p.sub { color: var(--muted); margin: 0 0 28px; }
+
+/* Selector de modalidad: control segmentado con indicador que se desliza */
+.segmentos { position: relative; display: inline-flex; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); box-shadow: var(--shadow); }
+.segmentos button { position: relative; z-index: 1; border: 0; background: none; padding: 9px 18px; border-radius: 10px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 600; transition: color .3s; }
+.segmentos button:hover { color: var(--text); }
+.segmentos button[aria-checked="true"] { color: #fff; }
+.indicador { position: absolute; top: 4px; bottom: 4px; left: 0; width: 0; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-deep)); box-shadow: 0 4px 18px rgba(229,25,45,.35); transition: transform .45s cubic-bezier(.65,0,.25,1), width .45s cubic-bezier(.65,0,.25,1); }
+#descModo { color: var(--muted); font-size: 13.5px; margin: 12px 0 18px; min-height: 1.6em; }
+#descModo.cambio { animation: entrar .35s ease both; }
+/* Interruptor */
+.interruptor { display: inline-flex; align-items: center; gap: 10px; border: 0; background: none; color: var(--muted); font-size: 13.5px; padding: 4px 8px; border-radius: 8px; }
+.interruptor:hover { color: var(--text); }
+.interruptor .meta { font-size: 12px; }
+/* Ejemplos de preguntas: chips discretos que enseñan qué pedir */
+.interruptor .pista { width: 34px; height: 20px; border-radius: 99px; background: var(--line); position: relative; transition: background .3s; flex: none; }
+.interruptor .pista::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--muted); transition: transform .3s cubic-bezier(.65,0,.25,1), background .3s; }
+.interruptor[aria-checked="true"] { color: var(--text); }
+.interruptor[aria-checked="true"] .pista { background: var(--accent); }
+.interruptor[aria-checked="true"] .pista::after { transform: translateX(14px); background: #fff; }
+
+/* Mensajes */
+.msg, .nota, .decision { animation: entrar .35s ease both; }
+.msg { margin: 18px 0; }
+.msg.user { display: flex; justify-content: flex-end; }
+.msg.user .burbuja { background: var(--user); color: #fff; box-shadow: 0 6px 20px rgba(160,10,30,.3); border-radius: 18px 18px 4px 18px; padding: 10px 16px; max-width: 85%; white-space: pre-wrap; word-wrap: break-word; }
+.msg.assistant .quien { font-size: 12px; color: var(--muted); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+.msg.assistant .quien::before { content: ""; width: 14px; height: 14px; border-radius: 4px; background: linear-gradient(135deg, var(--accent-2), var(--accent-deep)); display: inline-block; }
+.md { word-wrap: break-word; }
+.md p { margin: .5em 0; } .md :first-child { margin-top: 0; }
+.md pre { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; font-size: 13.5px; }
+.md code { font-family: Consolas, "Cascadia Code", monospace; font-size: .92em; background: var(--panel); padding: 1px 5px; border-radius: 5px; }
+.md pre code { background: none; padding: 0; }
+.md table { border-collapse: collapse; margin: .6em 0; display: block; overflow-x: auto; }
+.md th, .md td { border: 1px solid var(--line); padding: 5px 10px; }
+.md blockquote { border-left: 3px solid var(--accent); margin: .5em 0; padding-left: 12px; color: var(--muted); }
+.md .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+.nota { font-size: 13px; padding: 8px 12px; border-radius: 10px; margin: 10px 0; }
+.nota.aviso { background: var(--warn-soft); color: var(--warn); }
+.nota.error { background: var(--bad-soft); color: var(--bad); }
+.escribiendo span { display: inline-block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; background: var(--accent); animation: salto 1.2s infinite; }
+.escribiendo span:nth-child(2) { animation-delay: .15s; } .escribiendo span:nth-child(3) { animation-delay: .3s; }
+@keyframes salto { 0%, 60%, 100% { opacity: .3; transform: none; } 30% { opacity: 1; transform: translateY(-3px); } }
+
+/* Tarjeta de decisión: justificación en texto + el modelo matemático al desplegar */
+.decision { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--card); border-radius: 12px; margin: 6px 0 14px; box-shadow: var(--shadow); padding: 14px 16px; font-size: 14px; }
+.decision .cab { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 6px; }
+.decision ul { margin: 4px 0 0; padding-left: 20px; }
+.decision li { margin: 2px 0; }
+.decision li::marker { color: var(--accent); }
+.decision details { margin-top: 10px; font-size: 13.5px; }
+.decision summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.decision summary:hover { color: var(--text); }
+.formula { font-family: Consolas, monospace; font-size: 13px; background: var(--panel); border-radius: 8px; padding: 8px 10px; margin: 8px 0 10px; overflow-x: auto; white-space: nowrap; }
+.fila { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid var(--line); }
+.fila .id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: Consolas, monospace; font-size: 12.5px; }
+.barra { width: 90px; height: 6px; border-radius: 3px; background: var(--panel); overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
+.barra i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent-deep), var(--accent-2)); }
+.si { color: var(--ok); font-weight: 700; } .no { color: var(--bad); font-weight: 700; }
+.falla { font-size: 11.5px; padding: 1px 8px; border-radius: 99px; background: var(--bad-soft); color: var(--bad); margin-left: 4px; white-space: nowrap; }
+.meta { color: var(--muted); font-size: 12.5px; }
+
+/* Caja de texto: borde rojo que gira */
+.compositor { flex: none; padding: 0 20px 18px; }
+.caja { max-width: 760px; margin: 0 auto; border: 1.5px solid transparent; border-radius: 18px; box-shadow: var(--shadow); padding: 10px 10px 8px 14px; display: flex; flex-direction: column; gap: 6px;
+  background: linear-gradient(var(--card), var(--card)) padding-box,
+              conic-gradient(from var(--ang), var(--line) 0%, var(--accent-deep) 20%, var(--accent-2) 30%, var(--accent-deep) 40%, var(--line) 60%) border-box;
+  animation: girar 6s linear infinite; transition: box-shadow .2s; }
+.caja:focus-within { box-shadow: var(--glow); }
+.caja textarea { border: 0; outline: 0; resize: none; background: none; color: var(--text); font: inherit; max-height: 220px; padding: 2px 0; }
+.caja textarea:focus-visible { outline: 0; }
+.barra-caja { display: flex; align-items: center; gap: 6px; margin-left: -6px; }
+.barra-caja .hueco { flex: 1; }
+.clip:hover:not(:disabled) { color: var(--accent); background: var(--accent-soft); }
+.clip:disabled, .selector:disabled { opacity: .4; cursor: default; }
+#adjunto .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 99px; padding: 3px 10px; }
+#adjunto .x { border: 0; background: none; padding: 0 0 0 4px; color: inherit; }
+.selector { appearance: none; border: 1px solid var(--line); background: var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239b8c8e' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center; color: var(--text); font: inherit; font-size: 13px; padding: 5px 28px 5px 12px; border-radius: 99px; max-width: 260px; cursor: pointer; transition: border-color .2s; }
+.selector:hover:not(:disabled) { border-color: var(--accent); }
+.selector option, .selector optgroup { background: var(--card); color: var(--text); }
+.enviar { width: 34px; height: 34px; flex: none; border: 0; border-radius: 10px; background: linear-gradient(135deg, var(--accent-2), var(--accent-deep)); color: #fff; display: grid; place-items: center; transition: transform .15s, box-shadow .2s; }
+.enviar:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 0 20px rgba(229,25,45,.6); }
+.enviar:disabled { opacity: .35; cursor: default; }
+.ayuda { text-align: center; font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+
+/* Ajustes */
+dialog { border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: var(--text); padding: 0; width: min(620px, calc(100vw - 32px)); box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+dialog::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(2px); }
+.dlg { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; max-height: 85vh; overflow-y: auto; }
+.dlg h2 { margin: 0; font-size: 22px; }
+.prov { display: grid; grid-template-columns: 130px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.prov .nom { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+.prov input { font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; }
+.prov .acc { display: flex; gap: 6px; font-size: 12.5px; white-space: nowrap; }
+.pform { display: grid; grid-template-columns: 1fr 1.6fr 1fr auto; gap: 8px; margin: 10px 0 6px; }
+.pform input { font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); min-width: 0; }
+@media (max-width: 760px) { .pform { grid-template-columns: 1fr; } }
+.prov .err { grid-column: 2 / 4; color: var(--bad); font-size: 12px; margin-top: -4px; }
+a { color: var(--accent-2); }
+.dlg .acciones { display: flex; justify-content: flex-end; gap: 8px; }
+.btn { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 7px 14px; }
+.btn.chico { padding: 3px 8px; font-size: 12px; }
+.btn.prim { background: linear-gradient(135deg, var(--accent-2), var(--accent-deep)); border-color: var(--accent); color: #fff; font-weight: 600; }
+table.mods { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.mods th { text-align: left; color: var(--muted); font-weight: 600; }
+table.mods td, table.mods th { padding: 4px 6px; border-bottom: 1px solid var(--line); }
+table.mods td:nth-child(2) { font-family: Consolas, monospace; word-break: break-all; }
+#toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: var(--bg); padding: 9px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: .2s; pointer-events: none; max-width: 90vw; z-index: 10; }
+#toast.ver { opacity: 1; transform: translateX(-50%); }
+
+@media (max-width: 760px) {
+  aside { position: fixed; z-index: 5; height: 100%; box-shadow: var(--shadow); }
+  #inicio h1 { font-size: 28px; }
+  .segmentos button { padding: 8px 10px; }
+  .prov { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<!-- Íconos de línea reutilizables -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-libro" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-lapiz" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-revisar" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol>
+  <symbol id="i-brujula" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8l-2.1 6.3-6.3 2.1 2.1-6.3z"/></symbol>
+</svg>
+
+<aside id="lateral">
+  <div class="marca"><div class="logo">∑</div><b>Harness Educativo</b></div>
+  <button class="btn-nuevo" id="nuevo">＋ Nuevo chat</button>
+  <div class="seccion">Chats</div>
+  <nav id="lista"></nav>
+  <div class="pie">
+    <button id="abrirAjustes"><span class="punto" id="punto"></span><span id="estadoTxt">Conectando…</span></button>
+    <button id="tema" title="Cambiar tema" aria-label="Cambiar tema" style="flex:none">◐</button>
+  </div>
+</aside>
+
+<main>
+  <header>
+    <button class="icono" id="menu" title="Mostrar u ocultar chats" aria-label="Mostrar u ocultar chats">☰</button>
+    <div id="titulo"></div>
+    <span class="pastilla" id="modelo" hidden></span>
+  </header>
+  <div id="scroll"><div class="columna" id="contenido"></div></div>
+  <div class="compositor">
+    <div class="caja">
+      <div id="adjunto" hidden></div>
+      <textarea id="texto" rows="1" placeholder="Escribe tu pregunta…" aria-label="Mensaje"></textarea>
+      <div class="barra-caja">
+        <button class="icono clip" id="clip" title="Adjuntar material (.txt, .md, .tex…)" aria-label="Adjuntar archivo"><svg class="i"><use href="#i-clip"/></svg></button>
+        <div class="hueco"></div>
+        <select class="selector" id="selModelo" aria-label="Modelo de IA" title="Qué modelo usar"></select>
+        <button class="enviar" id="enviar" title="Enviar" aria-label="Enviar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="ayuda">Enter para enviar · Shift+Enter para nueva línea</div>
+  </div>
+</main>
+
+<dialog id="ajustes">
+  <form method="dialog" class="dlg">
+    <h2 class="serif">Proveedores</h2>
+    <div class="meta">OVHcloud viene incluido y funciona sin cuenta. Para mejores modelos y más cupo, pega la clave gratuita de otros proveedores. Con <b>Encontrar modelo</b> el harness elige entre todos ellos y, si uno se queda sin cuota, pasa a otro sin cortar el chat. Las claves se guardan solo en este equipo (<code>datos/config.json</code>).</div>
+    <div id="provs"></div>
+    <details class="personalizado">
+      <summary class="meta" style="cursor:pointer">＋ Agregar proveedor personalizado (cualquier API compatible con OpenAI)</summary>
+      <div class="pform">
+        <input id="pNombre" placeholder="Nombre (p. ej. Mi servidor)" aria-label="Nombre del proveedor">
+        <input id="pUrl" type="url" placeholder="URL base (p. ej. https://api.ejemplo.com/v1)" aria-label="URL base">
+        <input id="pClave" type="password" autocomplete="off" placeholder="Clave (opcional)" aria-label="Clave del proveedor">
+        <button class="btn" type="button" id="agregarProv">Agregar</button>
+      </div>
+      <div class="meta">Sus modelos se descubren solos y entran como "sin calificar": el harness no los usa para cálculo hasta que se califiquen en modelos.json.</div>
+    </details>
+    <div class="meta" id="cuota"></div>
+    <details>
+      <summary class="meta" style="cursor:pointer">Catálogo de modelos</summary>
+      <table class="mods"><thead><tr><th>Proveedor</th><th>Modelo</th><th>Contexto</th><th>Razon.</th><th>Vel.</th><th>Disp.</th></tr></thead><tbody id="tablaModelos"></tbody></table>
+    </details>
+    <div class="acciones">
+      <button class="btn" value="cerrar" formnovalidate>Cerrar</button>
+      <button class="btn prim" id="guardar">Guardar y conectar</button>
+    </div>
+  </form>
+</dialog>
+<input type="file" id="archivo" hidden accept=".pdf,.docx,.txt,.md,.tex,.csv,.json,.py,.java,.c,.cpp,.rs,.js,.html">
+<div id="toast" role="status"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const TAREAS = {
+  estudiar:   { icono: "i-libro",   nombre: "Estudiar", desc: "Te explica cualquier tema, o tus apuntes y lecturas, paso a paso." },
+  ejercicios: { icono: "i-lapiz",   nombre: "Practicar", desc: "Quizzes, preguntas y tarjetas para repasar; corrige tus respuestas." },
+  revision:   { icono: "i-revisar", nombre: "Revisar", desc: "Revisa tus ensayos, informes o tareas y te dice qué mejorar." },
+};
+// Nombre legible de un modelo: "google/gemma-4-31b-it:free" -> "Gemma 4 31b"
+const bonito = id => id.split("/").pop().replace(/:free$/, "").replace(/-(it|instruct)$/i, "").split(/[-_]/)
+  .map(p => ({ gpt: "GPT", oss: "OSS", glm: "GLM" })[p.toLowerCase()] || (/^[a-z]/.test(p) ? p[0].toUpperCase() + p.slice(1) : p)).join(" ");
+const precision = r => r >= 0.85 ? "precisión alta" : r >= 0.75 ? "precisión media" : "precisión básica";
+const NOMBRE_ATRIBUTO = { contexto: "contexto", razonamiento: "razonamiento", velocidad: "velocidad" };
+const NOMBRE_CLAUSULA = { "disponible": "no disponible / sin clave", "contexto suficiente": "contexto insuficiente", "razona bien si hay cálculo": "razonamiento bajo para cálculo", "razonamiento suficiente": "razonamiento insuficiente" };
+const usd = x => x == null ? "precio desconocido" : "US$" + (x < 0.01 ? x.toFixed(5) : x.toFixed(3));
+const AUTO = "";
+
+let chats = [], actual = null, ocupado = false, estadoApp = null;
+let borrador = { tipo: "estudiar", calculo: false, material: "", material_nombre: "" };
+
+// ---------- utilidades ----------
+async function api(ruta, metodo = "GET", cuerpo) {
+  const r = await fetch("/api" + ruta, { method: metodo, headers: { "Content-Type": "application/json" }, body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || "Error " + r.status);
+  return d;
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("ver"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("ver"), 3500); }
+const tokens = s => Math.floor(s.length / 4); // misma estimación que router.py
+const miles = n => n >= 1e6 ? (n / 1048576).toFixed(0) + "M" : Math.round(n / 1000) + "k";
+const icono = id => `<svg class="i"><use href="#${id}"/></svg>`;
+
+function markdown(texto) {
+  // Sin las librerías (sin internet) se muestra texto plano: nunca HTML sin sanear.
+  if (!window.marked || !window.DOMPurify) return esc(texto).replace(/\n/g, "<br>");
+  const formulas = [];
+  // Se sacan las fórmulas antes de Markdown para que los _ y * de LaTeX no se conviertan en cursivas.
+  texto = texto.replace(/\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]|\$([^$\n]+?)\$|\\\(([\s\S]+?)\\\)/g, (m, a, b, c, d) => {
+    const tex = a ?? b ?? c ?? d, bloque = a != null || b != null;
+    formulas.push(window.katex ? katex.renderToString(tex, { displayMode: bloque, throwOnError: false }) : esc(m));
+    return `@@F${formulas.length - 1}@@`;
+  });
+  return DOMPurify.sanitize(marked.parse(texto)).replace(/@@F(\d+)@@/g, (m, i) => formulas[i]);
+}
+
+// ---------- barra lateral ----------
+async function cargarLista() {
+  chats = await api("/chats");
+  const lista = $("#lista");
+  lista.innerHTML = chats.length ? "" : '<div class="vacio">Aún no hay chats.</div>';
+  for (const c of chats) {
+    const b = document.createElement("div");
+    b.className = "item" + (actual && actual.id === c.id ? " activo" : "");
+    b.innerHTML = `${icono(TAREAS[c.tipo]?.icono || "i-libro")}<span class="t">${esc(c.titulo)}</span><button class="borrar" title="Borrar chat" aria-label="Borrar chat">✕</button>`;
+    b.tabIndex = 0;
+    b.onclick = () => abrirChat(c.id);
+    b.onkeydown = e => { if (e.key === "Enter") abrirChat(c.id); };
+    b.querySelector(".borrar").onclick = async e => {
+      e.stopPropagation();
+      if (!confirm(`¿Borrar "${c.titulo}"?`)) return;
+      await api("/chats/" + c.id, "DELETE");
+      if (actual && actual.id === c.id) nuevoChat(); else cargarLista();
+    };
+    lista.appendChild(b);
+  }
+}
+
+// ---------- pantalla de inicio (nuevo chat) ----------
+function grafoSVG() {
+  // 3 nodos de tarea a la izquierda, 4 de modelo a la derecha; tres rutas rojas se trazan por turnos.
+  const izq = [14, 37, 60], der = [8, 29, 50, 71], rutas = [[0, 1], [1, 3], [2, 0]];
+  let s = `<svg class="grafo" viewBox="0 0 220 79" aria-hidden="true">`;
+  for (const a of izq) for (const b of der) s += `<line x1="30" y1="${a}" x2="190" y2="${b}"/>`;
+  // Cada ruta y el nodo de modelo al que llega comparten retraso, así el nodo se enciende cuando llega la línea.
+  rutas.forEach(([a, b], k) => s += `<line class="ruta" pathLength="1" style="animation-delay:${k * 2.5}s" x1="30" y1="${izq[a]}" x2="190" y2="${der[b]}"/>`);
+  izq.forEach((y, i) => s += `<circle class="tarea-n" data-i="${i}" cx="30" cy="${y}" r="5"/>`);
+  der.forEach((y, i) => {
+    const k = rutas.findIndex(r => r[1] === i);
+    s += k < 0 ? `<circle cx="190" cy="${y}" r="5"/>` : `<circle class="meta-n" style="animation-delay:${k * 2.5}s" cx="190" cy="${y}" r="5"/>`;
+  });
+  return s + "</svg>";
+}
+
+function nuevoChat() {
+  actual = null;
+  $("#titulo").textContent = "";
+  $("#modelo").hidden = true;
+  $("#contenido").innerHTML = `
+    <section id="inicio">
+      ${grafoSVG()}
+      <h1 class="serif">¿Qué vamos a estudiar hoy?</h1>
+      <p class="sub">Escribe tu duda de cualquier materia: el harness elige la IA gratuita que mejor te sirve.</p>
+      <div class="segmentos" role="radiogroup" aria-label="Modalidad">
+        <span class="indicador"></span>
+        ${Object.entries(TAREAS).map(([k, t]) => `<button role="radio" data-tipo="${k}" aria-checked="${borrador.tipo === k}">${icono(t.icono)}${t.nombre}</button>`).join("")}
+      </div>
+      <div id="descModo"></div>
+      <button class="interruptor" id="chCalc" role="switch" aria-checked="${borrador.calculo}" title="El harness lo detecta solo cuando tu pregunta tiene cálculos; actívalo si quieres asegurarlo"><span class="pista"></span>Necesito máxima precisión <span class="meta">(cálculos, fórmulas, datos exactos)</span></button>
+    </section>`;
+  document.querySelectorAll(".segmentos button").forEach(b => b.onclick = () => elegirModo(b.dataset.tipo));
+  $("#chCalc").onclick = e => { borrador.calculo = !borrador.calculo; e.currentTarget.setAttribute("aria-checked", borrador.calculo); };
+  elegirModo(borrador.tipo, true);
+  for (const id of ["#clip", "#selModelo"]) $(id).disabled = false;
+  $("#clip").title = "Adjuntar apuntes o lecturas (PDF, Word o texto)";
+  pintarAdjunto();
+  cargarLista();
+  $("#texto").focus();
+}
+
+function elegirModo(tipo, inicial) {
+  borrador.tipo = tipo;
+  const botones = [...document.querySelectorAll(".segmentos button")];
+  botones.forEach(b => b.setAttribute("aria-checked", b.dataset.tipo === tipo));
+  const activo = botones.find(b => b.dataset.tipo === tipo), ind = $(".indicador");
+  const mover = () => { ind.style.width = activo.offsetWidth + "px"; ind.style.transform = `translateX(${activo.offsetLeft}px)`; };
+  if (inicial) { ind.style.transition = "none"; mover(); ind.offsetWidth; ind.style.transition = ""; } else mover();
+  const d = $("#descModo");
+  d.textContent = TAREAS[tipo].desc;
+  d.classList.remove("cambio"); void d.offsetWidth; d.classList.add("cambio");
+  $("#texto").placeholder = { estudiar: "¿Qué quieres entender hoy?", ejercicios: "¿Sobre qué tema quieres practicar?", revision: "Pega aquí tu texto o adjunta tu trabajo…" }[tipo];
+  document.querySelectorAll(".grafo .tarea-n").forEach(c => c.classList.toggle("on", +c.dataset.i === Object.keys(TAREAS).indexOf(tipo)));
+}
+
+// PDF y Word se leen en el navegador; las librerías se cargan solo la primera vez que hacen falta.
+const cargarScript = src => new Promise((ok, mal) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => mal(new Error("No pude cargar el lector (¿sin internet?)")); document.head.appendChild(s); });
+async function leerArchivo(f) {
+  const ext = f.name.toLowerCase().split(".").pop();
+  if (ext === "pdf") {
+    if (!window.pdfjsLib) {
+      await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+    const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+    const paginas = [];
+    for (let i = 1; i <= pdf.numPages; i++) paginas.push((await (await pdf.getPage(i)).getTextContent()).items.map(t => t.str).join(" "));
+    return paginas.map((p, i) => `[Página ${i + 1}]\n${p}`).join("\n\n");
+  }
+  if (ext === "docx") {
+    if (!window.mammoth) await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js");
+    return (await mammoth.extractRawText({ arrayBuffer: await f.arrayBuffer() })).value;
+  }
+  return f.text();
+}
+$("#archivo").onchange = async e => {
+  const f = e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  borrador.material_nombre = f.name; borrador.material = ""; borrador.leyendo = true;
+  pintarAdjunto();
+  try {
+    const texto = await leerArchivo(f);
+    if (!texto.replace(/\[Página \d+\]/g, "").trim()) throw new Error("No encontré texto en el archivo (si es un PDF escaneado, son imágenes y no se pueden leer).");
+    borrador.material = texto;
+  } catch (err) {
+    toast(err.message); borrador.material_nombre = "";
+  } finally { borrador.leyendo = false; pintarAdjunto(); }
+};
+
+// El material decide el modelo (contexto necesario), por eso solo se adjunta al empezar un chat.
+function pintarAdjunto() {
+  const el = $("#adjunto"), b = borrador;
+  el.hidden = !b.material_nombre;
+  const palabras = b.material.split(/\s+/).filter(Boolean).length;
+  el.innerHTML = b.material_nombre ? `<span class="chip">${icono("i-clip")}${esc(b.material_nombre)} · ${b.leyendo ? "leyendo…" : `${palabras.toLocaleString()} palabras`}<button class="x" id="quitar" aria-label="Quitar material">✕</button></span>` : "";
+  if ($("#quitar")) $("#quitar").onclick = () => { borrador.material = ""; borrador.material_nombre = ""; pintarAdjunto(); };
+}
+$("#clip").onclick = () => $("#archivo").click();
+
+function pintarSelector() {
+  const sel = $("#selModelo"), previo = sel.value;
+  const disponibles = (estadoApp?.modelos || []).filter(m => m.disponible);
+  const grupos = {};
+  // Calificados primero y de más a menos razonamiento; los descubiertos en vivo van al final
+  disponibles.sort((a, b) => (b.calificado - a.calificado) || (b.razonamiento - a.razonamiento));
+  for (const m of disponibles) (grupos[m.proveedor] ||= []).push(m);
+  const etiqueta = m => bonito(m.id) + (m.calificado ? ` · ${precision(m.razonamiento)}` : " · sin evaluar") + (m.gratis ? "" : " · de pago");
+  sel.innerHTML = `<option value="${AUTO}">🧭 Encontrar modelo</option>` + Object.entries(grupos).map(([p, ms]) =>
+    `<optgroup label="${esc(p)}">${ms.map(m => `<option value="${esc(m.clave)}">${esc(etiqueta(m))}</option>`).join("")}</optgroup>`).join("");
+  sel.value = [...sel.options].some(o => o.value === previo) ? previo : AUTO;
+}
+
+// ---------- chat ----------
+async function abrirChat(id) {
+  try { actual = await api("/chats/" + id); } catch (e) { return toast(e.message); }
+  pintarChat();
+  cargarLista();
+}
+
+function justificacion(c) {
+  // Explica la decisión en lenguaje natural con los datos reales del modelo.
+  const d = c.decision, tarea = TAREAS[c.tipo].nombre;
+  const pesos = Object.entries(d.pesos).sort((a, b) => b[1] - a[1]);
+  const prioridad = pesos.slice(0, 2).map(([k, v]) => `${NOMBRE_ATRIBUTO[k]} (${Math.round(v * 100)} %)`).join(" y ");
+  const nombre = k => { const m = d.aptos.find(a => a.clave === k); return m ? `${m.id} (${m.proveedor})` : k; };
+  const respaldo = c.cadena.slice(1, 4).map(nombre);
+  const razones = [];
+  let cab;
+  if (d.manual) {
+    cab = `Elegiste <b>${esc(d.manual.id)}</b> de ${esc(d.manual.proveedor)}.`;
+    const rec = d.aptos[0];
+    if (rec && rec.clave !== d.manual.clave) razones.push(`Para <b>${tarea}</b> el harness habría recomendado <b>${esc(rec.id)}</b> (${esc(rec.proveedor)}, peso ${rec.peso.toFixed(3)}).`);
+    if (d.calculo && d.manual.razonamiento < d.umbral_calculo) razones.push(`⚠ Su razonamiento (${d.manual.razonamiento}) está por debajo del ${d.umbral_calculo} que se exige para cálculo: revisa bien sus resultados.`);
+  } else if (d.aptos.length) {
+    const m = d.aptos[0];
+    cab = `Elegí <b>${esc(m.id)}</b> de ${esc(m.proveedor)} para <b>${tarea}</b>.`;
+    const costos = d.aptos.map(a => a.costo).filter(x => x != null), caro = Math.max(...costos);
+    razones.push(`Es el <b>más barato de los ${d.aptos.length} modelos que cumplen todas las condiciones</b>: ≈${usd(m.costo)} por consulta a precio de referencia${costos.length > 1 && caro > m.costo ? `, frente a ${usd(caro)} del más caro apto (${Math.round(caro / Math.max(m.costo, 1e-9))}× más)` : ""}. Si hay empate de costo, gana el de mayor calidad w (aquí ${m.peso.toFixed(3)}).`);
+    razones.push(`Razonamiento ${m.razonamiento} ≥ ${d.calculo ? d.umbral_calculo : d.umbral_general}, el mínimo que exijo ${d.calculo ? "para cálculo y demostraciones" : "para estudiar"} (GPQA Diamond).`);
+    if (m.proveedor === "OVHcloud") razones.push("Viene incluido sin clave, pero con cupo bajo (≈2 mensajes por minuto por modelo).");
+    if (c.material_nombre) razones.push(`Su contexto de ${miles(m.contexto)} tokens cubre tu material (≈${miles(d.tokens)} tokens) con margen para la conversación.`);
+    else razones.push(`Contexto de ${miles(m.contexto)} tokens, razonamiento ${m.razonamiento}, velocidad ${m.velocidad}.`);
+    razones.push(m.gratis ? "Es gratuito." : `Es de pago: se cobra a tu clave de ${esc(m.proveedor)}.`);
+    if (m.fuente) razones.push(`Fuente del puntaje de razonamiento: ${esc(m.fuente)}.`);
+  } else {
+    cab = "Ningún modelo cumple todas las condiciones.";
+    razones.push("Configura otro proveedor en Ajustes o quita la exigencia de cálculo.");
+  }
+  // Se exige precisión si el estudiante la pide o si la red neuronal detecta cálculo
+  const pct = Math.round((d.p_calculo ?? 0) * 100);
+  razones.unshift(d.interruptor ? `Activaste el rigor matemático (la red neuronal estimaba ${pct} % de probabilidad de cálculo).`
+    : d.calculo ? `La red neuronal detectó cálculo o demostraciones en tu pregunta (${pct} % de probabilidad), así que exijo un modelo que razone bien.`
+    : `La red neuronal no detectó cálculo en tu pregunta (${pct} %): basta un modelo con razonamiento ≥ ${d.umbral_general}, así que puedo usar uno más barato.`);
+  if (d.recomendacion) razones.push(`Recomendación: ${esc(d.recomendacion.id)} (${esc(d.recomendacion.proveedor)}) tiene calidad w = ${d.recomendacion.peso.toFixed(3)}${d.aptos[0] ? " frente a " + d.aptos[0].peso.toFixed(3) : ""} del mejor modelo disponible.`);
+  if (d.descartados.length) razones.push(`Descarté ${d.descartados.length}: ${[...new Set(d.descartados.flatMap(x => x.falla))].map(f => NOMBRE_CLAUSULA[f] || f).join(", ")}.`);
+  if (respaldo.length) razones.push(`Si se agota su cuota sigo con: ${respaldo.map(esc).join(" → ")}.`);
+  if (d.red) razones.push(`Red de sustitución (Unidad 4): ${d.red.nodos} modelos aptos, ${d.red.aristas} aristas, ${d.red.componentes} componente(s) conexa(s). El elegido tiene ${d.red.vecinos} sustitutos directos (centralidad de grado ${d.red.grado}, cercanía armónica ${d.red.cercania}); el respaldo sigue las capas de BFS desde él. Modelo puente (mayor intermediación normalizada, ${d.red.intermediacion}): ${esc(d.red.puente)}.`);
+  return { cab, razones };
+}
+
+// Lo que ve cualquier estudiante: qué IA le responde y por qué, sin jerga.
+function resumenSimple(c) {
+  const d = c.decision, m = d.manual || d.aptos[0];
+  if (!m) return { cab: "No encontré una IA disponible para esta pregunta.", puntos: ["Revisa tu conexión a internet o agrega un proveedor en <b>Configurar proveedores</b>."] };
+  const siguiente = c.cadena.slice(1, 2).map(k => bonito(k.split("/").slice(1).join("/")))[0];
+  const puntos = [];
+  if (d.manual) puntos.push("Elegiste este modelo tú." + (d.calculo && m.razonamiento < d.umbral_calculo ? " ⚠ Para preguntas con cálculos no es de los más precisos: revisa bien sus resultados." : ""));
+  else puntos.push(d.calculo ? `Tu pregunta necesita precisión (cálculos o datos exactos), así que elegí uno de los modelos más precisos que tengo.`
+    : `Para esta pregunta basta un modelo ágil, así que elegí el más eficiente de los ${d.aptos.length} que sirven (${precision(m.razonamiento)}).`);
+  if (c.material_nombre) puntos.push(`Puede leer todo tu archivo <b>${esc(c.material_nombre)}</b> de una vez.`);
+  if (siguiente) puntos.push(`Si se satura, sigo con <b>${esc(siguiente)}</b> sin que pierdas la conversación.`);
+  if (d.recomendacion) puntos.push(`💡 Con una cuenta gratuita de <b>${esc(d.recomendacion.proveedor)}</b> podrías usar un modelo mejor (${esc(bonito(d.recomendacion.id))}). <a href="${esc(d.recomendacion.clave_en)}" target="_blank" rel="noopener">Conseguir clave gratis ↗</a> y pégala en Configurar proveedores.`);
+  return { cab: `Te responde <b>${esc(bonito(m.id))}</b> <span class="meta">· ${esc(m.proveedor)} · ${m.gratis ? "gratis" : "de pago"}</span>`, puntos };
+}
+
+function tarjetaDecision(c) {
+  const d = c.decision, { razones } = justificacion(c), simple = resumenSimple(c);
+  const max = Math.max(...d.aptos.map(a => a.peso), 0.01);
+  const filas = d.aptos.map((a, i) => `<div class="fila"><span class="si">✓</span><span class="id">${esc(a.proveedor)} · ${esc(a.id)}${i === 0 ? " <b>· elegido</b>" : ""}</span><span>${usd(a.costo)} · <span class="barra"><i style="width:${(a.peso / max * 100).toFixed(0)}%"></i></span>w ${a.peso.toFixed(3)}</span></div>`).join("")
+    + d.descartados.map(x => `<div class="fila"><span class="no">✗</span><span class="id">${esc(x.proveedor)} · ${esc(x.id)}</span><span>${x.falla.map(f => `<span class="falla">${esc(NOMBRE_CLAUSULA[f] || f)}</span>`).join("")}</span></div>`).join("");
+  return `<div class="decision">
+    <div class="cab">${icono("i-brujula")}<span>${simple.cab}</span></div>
+    <ul>${simple.puntos.map(r => `<li>${r}</li>`).join("")}</ul>
+    <details><summary>¿Cómo lo decidió? (detalles técnicos)</summary>
+      <ul>${razones.map(r => `<li>${r}</li>`).join("")}</ul>
+      <div class="formula">red neuronal: P(cálculo) = ${(d.p_calculo ?? 0).toFixed(3)}  → exige precisión si ≥ 0.5 o si activaste el interruptor<br>apto: disponible, contexto suficiente y razonamiento ≥ ${d.calculo ? d.umbral_calculo : d.umbral_general}<br>costo(t, m) = (tokens_entrada · precio_entrada + ${d.salida} · precio_salida) / 10⁶<br>elegido = arg min costo(t, m) entre los aptos  (empate: arg max w)</div>
+      <div class="meta">w(${esc(c.tipo)}, m) = ${Object.entries(d.pesos).map(([k, v]) => `${v}·${k}`).join(" + ")} · material ≈ ${d.tokens.toLocaleString()} tokens${c.material_nombre ? " (" + esc(c.material_nombre) + ")" : ""} · cálculo: ${d.calculo ? "sí" : "no"}</div>
+      ${filas}
+    </details></div>`;
+}
+
+function pintarMensaje(m) {
+  if (m.role === "system" || m.oculto) return "";
+  if (m.role === "user") return `<div class="msg user"><div class="burbuja">${esc(m.content)}</div></div>`;
+  if (m.role === "assistant") {
+    // El gasto (útil para el experimento) queda en el tooltip para no distraer al estudiante.
+    const gasto = m.tokens_entrada != null ? `${m.modelo} · ${m.tokens_entrada.toLocaleString()} + ${m.tokens_salida.toLocaleString()} tokens${m.medido ? "" : " (estimados)"} · ${usd(m.costo_ref)} a precio de referencia` : (m.modelo || "");
+    return `<div class="msg assistant"><div class="quien" title="${esc(gasto)}">${esc(bonito((m.modelo || "").split("/").slice(1).join("/") || m.modelo || ""))}</div><div class="md">${markdown(m.content)}</div></div>`;
+  }
+  return `<div class="nota ${m.role === "aviso" ? "aviso" : "error"}">${esc(m.content)}</div>`;
+}
+
+function pintarChat(pendiente) {
+  const c = actual;
+  $("#titulo").textContent = c.titulo;
+  const modelo = c.cadena[0];
+  $("#modelo").hidden = !modelo;
+  $("#modelo").textContent = modelo ? bonito(modelo.split("/").slice(1).join("/")) : "";
+  $("#modelo").title = modelo || "";
+  for (const id of ["#clip", "#selModelo"]) $(id).disabled = true;
+  $("#clip").title = "El material se adjunta al empezar un chat nuevo";
+  $("#adjunto").hidden = true;
+  $("#texto").placeholder = modelo ? "Responde o pregunta algo más…" : "Ningún modelo disponible: crea un chat nuevo";
+  $("#contenido").innerHTML = tarjetaDecision(c) + c.mensajes.map(pintarMensaje).join("")
+    + (pendiente ? `<div class="msg user"><div class="burbuja">${esc(pendiente)}</div></div><div class="msg assistant"><div class="quien">${esc(modelo || "")}</div><div class="escribiendo"><span></span><span></span><span></span></div></div>` : "");
+  const s = $("#scroll"); s.scrollTop = s.scrollHeight;
+}
+
+async function enviar() {
+  const caja = $("#texto"), texto = caja.value.trim();
+  if (!texto || ocupado) return;
+  if (borrador.leyendo) return toast("Todavía estoy leyendo tu archivo, un momento…");
+  if (estadoApp?.cargando) return toast("Conectando con los proveedores, un momento…");
+  ocupado = true; $("#enviar").disabled = true;
+  try {
+    if (!actual) {
+      actual = await api("/chats", "POST", { ...borrador, modelo: $("#selModelo").value, titulo: texto.slice(0, 50), texto });
+      borrador.material = ""; borrador.material_nombre = "";
+      cargarLista();
+      if (!actual.cadena.length) { pintarChat(); return; }
+    }
+    caja.value = ""; ajustarAltura();
+    pintarChat(texto);
+    actual = await api(`/chats/${actual.id}/mensaje`, "POST", { texto });
+    pintarChat();
+  } catch (e) {
+    caja.value = texto; ajustarAltura();
+    if (actual) pintarChat();
+    toast(e.message);
+    if (/proveedor/i.test(e.message)) abrirAjustes();
+  } finally {
+    ocupado = false; $("#enviar").disabled = false; caja.focus();
+  }
+}
+
+function ajustarAltura() { const t = $("#texto"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 220) + "px"; }
+$("#texto").addEventListener("input", ajustarAltura);
+$("#texto").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); enviar(); } });
+$("#enviar").onclick = enviar;
+$("#nuevo").onclick = nuevoChat;
+$("#menu").onclick = () => $("#lateral").classList.toggle("oculta");
+// En pantallas estrechas la barra lateral flota encima del chat: empieza cerrada y se cierra al elegir algo.
+const estrecha = () => matchMedia("(max-width: 760px)").matches;
+if (estrecha()) $("#lateral").classList.add("oculta");
+$("#lateral").addEventListener("click", e => { if (estrecha() && e.target.closest(".item, .btn-nuevo")) $("#lateral").classList.add("oculta"); });
+window.addEventListener("resize", () => { if (!actual && $(".indicador")) elegirModo(borrador.tipo, true); });
+
+// ---------- ajustes y estado ----------
+function pintarEstado(e) {
+  estadoApp = e;
+  const conectados = e.proveedores.filter(p => p.conectado).length, conClave = e.proveedores.filter(p => p.tiene_clave).length;
+  $("#punto").className = "punto " + (conectados ? "ok" : conClave ? "bad" : "");
+  $("#estadoTxt").textContent = e.cargando ? "Conectando…" : conectados ? `${conectados} proveedor${conectados > 1 ? "es" : ""} conectado${conectados > 1 ? "s" : ""}` : "Configurar proveedores";
+  const nModelos = p => e.modelos.filter(m => m.disponible && m.proveedor === p.nombre).length;
+  $("#provs").innerHTML = e.proveedores.map(p => `
+    <div class="prov">
+      <span class="nom"><span class="punto ${p.conectado ? "ok" : p.error ? "bad" : ""}"></span>${esc(p.nombre)}${p.pago && !p.personalizado ? ' <span class="meta">(pago)</span>' : ""}</span>
+      ${p.sin_clave ? `<span class="meta">Incluido sin clave · cupo bajo (≈2 mensajes/min por modelo)</span><span></span>` : `
+      <input type="password" autocomplete="off" data-prov="${p.id}" aria-label="Clave de ${esc(p.nombre)}" placeholder="${p.tiene_clave ? "•••••••• guardada (escribe para cambiarla)" : "Pega tu clave"}">
+      <span class="acc">${p.personalizado ? `<button class="btn chico" type="button" data-borrar="${p.id}">Eliminar</button>`
+        : (p.tiene_clave ? `<button class="btn chico" type="button" data-quitar="${p.id}">Quitar</button>` : "") + `<a href="${p.clave_en}" target="_blank" rel="noopener">Obtener clave ↗</a>`}</span>`}
+      ${p.conectado ? `<span class="meta" style="grid-column:2/4;margin-top:-6px">${nModelos(p)} modelos disponibles${p.personalizado ? " · " + esc(p.url) : ""}</span>` : ""}
+      ${p.error ? `<span class="err">${esc(p.error)}</span>` : ""}
+    </div>`).join("");
+  document.querySelectorAll("[data-quitar]").forEach(b => b.onclick = () => guardar({ claves: { [b.dataset.quitar]: null } }));
+  document.querySelectorAll("[data-borrar]").forEach(b => b.onclick = () => guardar({ quitar_personalizado: b.dataset.borrar }));
+  $("#cuota").textContent = e.cuota ? `OpenRouter: usado ${e.cuota.usage ?? "?"} de ${e.cuota.limit ?? "sin límite"}${e.cuota.is_free_tier ? " (plan gratuito)" : ""}` : "";
+  $("#tablaModelos").innerHTML = e.modelos.map(m => `<tr><td>${esc(m.proveedor)}</td><td>${esc(m.id)}</td><td>${miles(m.contexto)}</td><td>${m.calificado ? m.razonamiento : "—"}</td><td>${m.velocidad}</td><td>${m.disponible === false ? '<span class="no">no</span>' : m.disponible ? '<span class="si">sí</span>' : "?"}</td></tr>`).join("");
+  pintarSelector();
+  if (e.cargando) setTimeout(refrescarEstado, 1500);
+}
+const refrescarEstado = () => api("/estado").then(pintarEstado).catch(() => {});
+async function abrirAjustes() { await refrescarEstado(); $("#ajustes").showModal(); }
+async function guardar(cuerpo) {
+  $("#guardar").disabled = true; $("#guardar").textContent = "Conectando…";
+  try {
+    const e = await api("/config", "POST", cuerpo);
+    pintarEstado(e);
+    const n = e.proveedores.filter(p => p.conectado).length;
+    toast(n ? `Conectado a ${n} proveedor${n > 1 ? "es" : ""} ✓` : "Guardado, pero ningún proveedor conectó");
+    return n;
+  } catch (err) { toast(err.message); }
+  finally { $("#guardar").disabled = false; $("#guardar").textContent = "Guardar y conectar"; }
+}
+$("#abrirAjustes").onclick = abrirAjustes;
+$("#guardar").onclick = async ev => {
+  ev.preventDefault();
+  const claves = {};
+  document.querySelectorAll("#provs input").forEach(i => { if (i.value.trim()) claves[i.dataset.prov] = i.value.trim(); });
+  if (await guardar({ claves })) $("#ajustes").close();
+};
+$("#agregarProv").onclick = async () => {
+  const personalizado = { nombre: $("#pNombre").value, url: $("#pUrl").value, clave: $("#pClave").value };
+  if (!personalizado.nombre.trim() || !personalizado.url.trim()) return toast("Escribe al menos el nombre y la URL base.");
+  if (await guardar({ personalizado }) !== undefined) for (const id of ["#pNombre", "#pUrl", "#pClave"]) $(id).value = "";
+};
+
+// ---------- tema ----------
+function aplicarTema(t) { if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; }
+try { aplicarTema(localStorage.getItem("tema")); } catch {}
+$("#tema").onclick = () => {
+  const nuevo = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  aplicarTema(nuevo);
+  try { localStorage.setItem("tema", nuevo); } catch {}
+};
+
+// Latido: si la ventana se cierra, el servidor se apaga solo.
+const latir = () => fetch("/api/ping", { method: "POST" }).catch(() => {});
+latir(); setInterval(latir, 15000);
+
+window.addEventListener("load", () => { refrescarEstado(); nuevoChat(); });
+</script>
+</body>
+</html>

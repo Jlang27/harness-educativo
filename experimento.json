@@ -1,0 +1,25 @@
+{
+  "_nota": "Ejercicios con respuesta conocida tomados de los apuntes del curso (Unidades 3 y 4, clases de grafos e inducción). 'respuesta' es la respuesta correcta; los numéricos se comparan como número.",
+  "ejercicios": [
+    {"pregunta": "¿Cuántas aristas hay en un grafo con diez vértices, cada uno de los cuales tiene grado seis?", "respuesta": "30", "fuente": "Zuleta, lema del apretón de manos"},
+    {"pregunta": "Determine el número de aristas de un grafo cuyos vértices tienen grados 1, 2, 2, 3 y 0.", "respuesta": "4", "fuente": "Zuleta, lema del apretón de manos"},
+    {"pregunta": "Un grafo simple G1 tiene 9 aristas y es 3-regular. ¿Cuántos vértices tiene?", "respuesta": "6", "fuente": "Zuleta, grafos regulares"},
+    {"pregunta": "Un grafo simple G3 tiene 10 aristas; dos de sus vértices son de grado 4 y los restantes de grado 3. ¿Cuántos vértices tiene?", "respuesta": "6", "fuente": "Zuleta, grafos regulares"},
+    {"pregunta": "¿Cuántas aristas tiene el grafo completo K5?", "respuesta": "10", "fuente": "Gómez, 3.6"},
+    {"pregunta": "¿Cuántas aristas tiene el grafo bipartito completo K3,3?", "respuesta": "9", "fuente": "Gómez, 3.6"},
+    {"pregunta": "Un árbol tiene 7 vértices. ¿Cuántas aristas tiene?", "respuesta": "6", "fuente": "Gómez, 3.7"},
+    {"pregunta": "Un grafo plano y conexo tiene 4 vértices y 5 aristas. ¿Cuántas caras tiene, contando la exterior?", "respuesta": "3", "fuente": "Gómez, 3.6 fórmula de Euler"},
+    {"pregunta": "En el multigrafo de Königsberg los grados son A=3, B=3, C=5 y D=3. ¿Tiene circuito euleriano? Responde sí o no.", "respuesta": "no", "fuente": "Gómez, 3.5"},
+    {"pregunta": "Sea R el grafo no dirigido con aristas AB, AC, BD, CD, DE, EF. ¿Cuál es la distancia d(A, F)?", "respuesta": "4", "fuente": "Gómez, 4.3 BFS"},
+    {"pregunta": "Sea R el grafo no dirigido con aristas AB, AC, BD, CD, DE, EF. ¿Cuál es su diámetro?", "respuesta": "4", "fuente": "Gómez, 4.3"},
+    {"pregunta": "Sea R el grafo no dirigido con aristas AB, AC, BD, CD, DE, EF. ¿Cuál es la centralidad de grado de D, deg(D)/(n-1)? Da el número decimal.", "respuesta": "0.6", "fuente": "Gómez, 4.3"},
+    {"pregunta": "Sea R el grafo no dirigido con aristas AB, AC, BD, CD, DE, EF. ¿Cuál es la centralidad de intermediación (sin normalizar) del vértice E?", "respuesta": "4", "fuente": "Gómez, 4.3"},
+    {"pregunta": "Grafo ponderado con aristas AB=4, BC=3, CD=2, DE=5, EA=6, AC=7. ¿Cuál es el costo del árbol de expansión mínimo?", "respuesta": "14", "fuente": "Gómez, 3.8 MST"},
+    {"pregunta": "Calcula 1 + 3 + 5 + ... + (2n - 1) para n = 10.", "respuesta": "100", "fuente": "Zuleta, inducción"},
+    {"pregunta": "¿Es n^3 + 5n divisible por 6 cuando n = 7? Responde sí o no.", "respuesta": "sí", "fuente": "Zuleta, inducción"},
+    {"pregunta": "¿Qué recorrido de grafos explora por capas usando una cola? Responde solo la sigla.", "respuesta": "BFS", "fuente": "Gómez, 3.8"},
+    {"pregunta": "¿Qué estructura de datos usa el recorrido DFS (además de la recursión)? Responde una palabra en español.", "respuesta": "pila", "fuente": "Gómez, 3.8"},
+    {"pregunta": "Completa la definición: un árbol es un grafo conexo y ... Responde una sola palabra.", "respuesta": "acíclico", "fuente": "Gómez, 3.7"},
+    {"pregunta": "¿Cómo se llama la medida de centralidad que identifica al nodo 'puente' por el que pasan los caminos más cortos entre otros nodos? Responde una palabra.", "respuesta": "intermediación", "fuente": "Gómez, 4.3"}
+  ]
+}

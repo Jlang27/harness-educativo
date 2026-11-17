@@ -1,0 +1,337 @@
+% Informe del proyecto final de Matemáticas Discretas (MAT 4021).
+% Compilar en Overleaf con pdfLaTeX (Biber se ejecuta solo). Archivos: informe.tex y referencias.bib.
+\documentclass[12pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands,es-tabla]{babel}
+\usepackage{csquotes}
+\usepackage{amsmath}
+\usepackage{newtxtext,newtxmath}           % Times, como pide APA
+\usepackage[margin=2.54cm]{geometry}       % márgenes de 1 pulgada (APA)
+\usepackage{setspace}
+\usepackage{booktabs,tabularx,array}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage[style=apa,backend=biber]{biblatex}
+\addbibresource{referencias.bib}
+\usepackage{microtype}                     % justificado más parejo, sin ríos ni cortes feos
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{tinta}{HTML}{1F2A44}
+\titleformat{\section}{\large\bfseries\color{tinta}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{tinta}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.7em}
+\titlespacing*{\subsection}{0pt}{1.1em}{0.4em}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}                    % APA: número de página arriba a la derecha
+\renewcommand{\headrulewidth}{0pt}
+
+\onehalfspacing
+\setlength{\parindent}{1.27cm}
+\setlength{\emergencystretch}{1.5em}      % evita líneas desbordadas al justificar en español
+\setlist{itemsep=2pt, topsep=4pt}
+\captionsetup{labelfont=bf,justification=raggedright,singlelinecheck=false}
+\floatname{algorithm}{Algoritmo}
+\renewcommand{\listalgorithmname}{Lista de algoritmos}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicensure{\textbf{Salida:}}
+\algrenewcommand\algorithmicif{\textbf{si}}
+\algrenewcommand\algorithmicthen{\textbf{entonces}}
+\algrenewcommand\algorithmicelse{\textbf{si no}}
+\algrenewcommand\algorithmicend{\textbf{fin}}
+\algrenewcommand\algorithmicfor{\textbf{para}}
+\algrenewcommand\algorithmicdo{\textbf{hacer}}
+\algrenewcommand\algorithmicwhile{\textbf{mientras}}
+\algrenewcommand\algorithmicreturn{\textbf{devolver}}
+
+\begin{document}
+
+% ------------------------------------------------------------------ Portada (APA 7, trabajo de estudiante)
+\begin{titlepage}
+\centering
+{\large\scshape Universidad del Norte\par}
+{\normalsize Departamento de Matemáticas y Estadística\par}
+\vspace{3.2cm}
+{\color{tinta}\rule{\linewidth}{1.2pt}\par}
+\vspace{0.6cm}
+{\LARGE\bfseries\color{tinta} Enrutamiento de modelos de inteligencia artificial para el estudio universitario\par}
+\vspace{0.5cm}
+{\large Un modelo de decisión con grafos, análisis de redes y una red neuronal\par}
+\vspace{0.6cm}
+{\color{tinta}\rule{\linewidth}{1.2pt}\par}
+\vspace{2.2cm}
+{\large\bfseries Integrantes\par}
+\vspace{0.3cm}
+José Angulo\\ Sebastián Ibañez\\ Andrés Suarez\\ Samuel Ramírez\\ Manuel Hormechea\par
+\vfill
+Matemáticas Discretas (MAT 4021)\\
+Profesor: MSc. Iván Gómez\\[0.3cm]
+Barranquilla, 16 de noviembre de 2026\par
+\end{titlepage}
+
+% ------------------------------------------------------------------ 1. Resumen
+\section*{Resumen}
+Las universidades empiezan a ofrecer modelos de inteligencia artificial (IA) a toda su población estudiantil, pero existen decenas de modelos con capacidades, ventanas de contexto, cupos y precios muy distintos. Usar siempre el modelo más potente incrementa el costo a escala y elegir solo por precio puede afectar la calidad en tareas exactas; además, cuando un modelo se satura, la sesión puede interrumpirse. Este trabajo modela la decisión \emph{qué modelo se selecciona al iniciar cada chat} con la teoría del curso: una red neuronal (perceptrón multicapa) estima si la pregunta inicial exige precisión; tres requisitos mínimos (disponibilidad, contexto y razonamiento) definen qué modelos son aptos; un grafo bipartito ponderado tareas--modelos selecciona la arista apta de menor costo; una red de sustitución entre modelos, analizada con BFS y centralidades de grado, cercanía e intermediación, ordena el respaldo; y una demostración por inducción justifica limitar el historial que se reenvía. El modelo se implementó en un prototipo propio (\emph{harness}) con interfaz gráfica que combina siete proveedores gratuitos, uno de pago y los que agregue el usuario. En un experimento con 20 ejercicios de respuesta conocida, realizado con la versión de respaldo ordenado por costo, el harness obtuvo 20 aciertos y cero cortes; la estrategia del modelo más potente obtuvo 17 aciertos y 3 cortes. El costo de referencia del harness fue 6,7 veces menor (ahorro estimado del 85\,\%).
+
+\noindent\textbf{Palabras clave:} grafos bipartitos, centralidad, redes neuronales, modelos de lenguaje, educación superior.
+
+\newpage
+% ------------------------------------------------------------------ 2. Introducción
+\section{Introducción: problema, impacto y objetivos}
+
+\subsection{El problema}
+La IA generativa ya es una herramienta cotidiana de estudio. En Colombia, el 84\,\% de los estudiantes encuestados de educación superior manifestó usar IA generativa \parencite{impactotic2024}. En el Reino Unido, el uso de cualquier herramienta de IA pasó del 66\,\% al 92\,\% entre 2024 y 2025; el 88\,\% declaró usar IA generativa en sus evaluaciones, con usos frecuentes como explicar conceptos y resumir lecturas \parencite{hepi2025}. Las instituciones también empiezan a proveerla: en 2025 el sistema California State University anunció acceso a herramientas de IA para más de 460\,000 estudiantes \parencite{axios2025csu}.
+
+Cuando una institución (o un estudiante con varias claves gratuitas) tiene acceso a muchos modelos, aparece un problema de decisión que hoy se resuelve mal:
+\begin{enumerate}[nosep]
+  \item \textbf{Costo:} enviar todas las preguntas al modelo más potente incrementa el gasto con miles de usuarios, incluso en tareas sencillas como explicar un concepto básico.
+  \item \textbf{Confiabilidad:} elegir solo por precio puede comprometer la calidad en cálculos, fórmulas y datos exactos.
+  \item \textbf{Continuidad:} si el modelo elegido se satura o agota su cupo, la sesión de estudio se interrumpe.
+\end{enumerate}
+Elegir \emph{el modelo adecuado de menor costo} para una tarea de estudio es un problema reconocido en la literatura de enrutamiento de modelos de lenguaje \parencite{ong2024routellm}. Este proyecto lo aborda con la teoría del curso, realizando la selección al inicio de cada chat a partir de la pregunta inicial y el material adjunto. Es importante precisar lo que \emph{no} pretende: no compite en calidad con las aplicaciones web de los modelos de frontera; resuelve la decisión, el costo y la continuidad cuando hay que atender a muchos estudiantes con muchos modelos.
+
+\subsection{Condiciones de impacto}
+La Tabla~\ref{tab:impacto} responde las cuatro condiciones de impacto del proyecto \parencite{gomez2026proyecto}.
+
+\begin{table}[htbp]
+\caption{Condiciones de impacto del problema}\label{tab:impacto}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm}X}
+\toprule
+\textbf{Condición} & \textbf{Respuesta} \\
+\midrule
+Afecta a alguien & Instituciones que despliegan IA para su población estudiantil y esos estudiantes, de cualquier carrera. En Colombia, el 84\,\% de los estudiantes encuestados de educación superior manifestó usar IA generativa \parencite{impactotic2024}. Como referencia de escala, CSU anunció acceso para más de 460\,000 estudiantes \parencite{axios2025csu}. \\
+Hay evidencia & Despliegues institucionales a gran escala \parencite{axios2025csu}; diferencias de precio de hasta dos órdenes de magnitud entre modelos \parencite{openrouter2026}; diferencias de precisión medidas con el banco GPQA Diamond \parencite{rein2023gpqa}. \\
+Se puede mejorar & Se mide, antes y después, el porcentaje de aciertos, las interrupciones y el costo al atender ejercicios de respuesta conocida (Sección~\ref{sec:resultados}). \\
+Se puede modelar & Red neuronal, grafo bipartito ponderado, análisis de redes (BFS y centralidades) e inducción matemática (Sección~\ref{sec:modelacion}). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Objetivos}
+\textbf{Objetivo general.} Diseñar e implementar un prototipo que, entre los modelos de IA disponibles, seleccione al iniciar cada chat el modelo adecuado de menor costo a partir de la pregunta inicial y el material adjunto, mantenga la continuidad de la sesión y justifique la decisión con la teoría del curso.
+
+\textbf{Objetivos específicos.}
+\begin{enumerate}[nosep]
+  \item Estimar con una red neuronal si la entrada inicial del chat exige precisión (cálculos o datos exactos).
+  \item Definir los requisitos mínimos (disponibilidad, contexto y razonamiento) para que un modelo sea apto.
+  \item Modelar la selección inicial del modelo mediante un grafo bipartito ponderado tareas--modelos por costo y calidad.
+  \item Ordenar el respaldo con una red de sustitución analizada con BFS y medidas de centralidad.
+  \item Evaluar el prototipo frente a estrategias de referencia con ejercicios de respuesta conocida.
+\end{enumerate}
+
+% ------------------------------------------------------------------ 3. Modelación
+\section{Modelación con la teoría del curso}\label{sec:modelacion}
+
+La Figura~\ref{fig:flujo} resume la selección inicial y el envío de mensajes. Al crear el chat se aplican la red neuronal, el filtro de requisitos, el grafo bipartito y la red de sustitución. En los envíos posteriores se usa la ventana deslizante, justificada por inducción, y se comprueba el contexto antes de responder o avanzar en la cadena de respaldo.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=0.45cm, every node/.style={font=\small},
+  caja/.style={draw, rounded corners, align=center, minimum height=0.95cm, text width=2.45cm, fill=gray!8}]
+\node[caja] (p) {Pregunta inicial\\y material};
+\node[caja, right=of p] (n) {Red neuronal\\¿exige precisión?};
+\node[caja, right=of n] (b) {Requisitos mínimos\\¿qué modelos sirven?};
+\node[caja, right=of b] (g) {Grafo bipartito\\apto de menor costo};
+\node[caja, below=0.9cm of g] (r) {Red de sustitución\\BFS y centralidad};
+\node[caja, left=of r] (v) {Ventana deslizante\\(inducción)};
+\node[caja, left=of v] (a) {API del modelo y respaldo};
+\draw[-{Stealth}] (p) -- (n); \draw[-{Stealth}] (n) -- (b); \draw[-{Stealth}] (b) -- (g);
+\draw[-{Stealth}] (g) -- (r); \draw[-{Stealth}] (r) -- (v); \draw[-{Stealth}] (v) -- (a);
+\end{tikzpicture}
+\caption{Selección al iniciar el chat y envío con respaldo}\label{fig:flujo}
+\end{figure}
+
+\subsection{Red neuronal: ¿la entrada inicial exige precisión?}
+Sea $x\in\{0,1\}^V$ el vector de rasgos de la pregunta inicial y de los primeros 3\,000 caracteres del material adjunto: palabras, raíces de cinco letras (para que \emph{derivada} y \emph{derivar} compartan \emph{deriv}) y un rasgo que indica símbolos matemáticos. Se usa un perceptrón multicapa con una capa oculta de 8 neuronas:
+\begin{equation}
+h=\tanh(W_1x+b_1),\qquad N=\sigma(w_2^{\top}h+b_2)=P(\text{la entrada inicial exige precisión}),
+\end{equation}
+donde $\sigma(s)=1/(1+e^{-s})$. Los pesos se ajustan por descenso del gradiente estocástico minimizando la entropía cruzada binaria, con retropropagación \parencite{rumelhart1986}; para la salida sigmoide, $\partial L/\partial s = N-y$. El conjunto de entrenamiento tiene 84 ejemplos etiquetados a mano (42 con cálculo y 42 sin él) de materias diversas, y el vocabulario resultante tiene $V=573$ rasgos. Como $x$ es binario y disperso, $W_1x$ es solo la suma de las columnas de los rasgos presentes, lo que hace que el entrenamiento tome menos de un segundo.
+
+\subsection{Requisitos mínimos: ¿qué modelos son aptos?}
+Antes de comparar costos al iniciar el chat hay que descartar los modelos que no pueden atender su entrada inicial. Un modelo $m$ es \emph{apto} si cumple los tres requisitos siguientes:
+\begin{enumerate}[nosep]
+  \item \textbf{Disponible:} tiene un cliente conectado y aparece en el catálogo del proveedor; el cupo real se comprueba al enviar la petición.
+  \item \textbf{Contexto suficiente:} $\mathrm{ctx}(m)\ge 1{,}5\cdot\text{tokens}$, para que quepan el material y la conversación.
+  \item \textbf{Razonamiento suficiente:} $\mathrm{GPQA}(m)\ge 0{,}80$ si la pregunta exige precisión y $\mathrm{GPQA}(m)\ge 0{,}60$ si no.
+\end{enumerate}
+La entrada inicial exige precisión si la red neuronal estima una probabilidad de al menos 0,5 o si el estudiante activó \enquote{Necesito máxima precisión}; así, el estudiante puede pedir precisión aunque la red no la detecte, pero no quitarla cuando la red sí la detecta. Se usa GPQA Diamond como indicador aproximado de razonamiento científico \parencite{rein2023gpqa}. Los umbrales de 0,80 y 0,60 son decisiones de diseño del prototipo: filtran candidatos según el puntaje del catálogo, pero no garantizan respuestas correctas ni miden directamente el desempeño en todas las materias. Ocho puntajes del catálogo son estimados y se identifican en su campo de fuente.
+
+Los márgenes de contexto cumplen funciones distintas: al iniciar se exige $\mathrm{ctx}(m)\ge 1{,}5\cdot\mathrm{tokens}$; en cada envío se comprueba $\mathrm{ctx}(m)\ge 1{,}2\cdot\mathrm{tokens}(H')$ sobre el historial que realmente se reenvía. Son márgenes heurísticos y los tokens se estiman por longitud del texto.
+
+\subsection{Grafo bipartito ponderado: selección inicial del modelo}
+Siguiendo las cuatro preguntas de modelación de la Unidad 4 \parencite{gomez2026redes}: los \textbf{nodos} son de dos clases, tipos de tarea $T=\{\text{estudiar},\text{practicar},\text{revisar}\}$ y modelos $M$; hay una \textbf{arista} $\{t,m\}$ si $m$ es apto para la entrada inicial del chat; la red es \textbf{no dirigida} y \textbf{bipartita}, porque no hay aristas dentro de $T$ ni dentro de $M$ \parencite{gomez2026grafos,gutierrez2024grafos}; y es \textbf{ponderada} con dos pesos por arista:
+\begin{align}
+\mathrm{costo}(t,m) &= \frac{\text{tokens}_{\text{entrada}}\cdot p_{\text{ent}}(m)+s_t\cdot p_{\text{sal}}(m)}{10^{6}},\\
+w(t,m) &= \alpha_t\,\min\!\left(\frac{\mathrm{ctx}(m)}{2^{20}},1\right)+\beta_t\,\mathrm{GPQA}(m)+\gamma_t\,\mathrm{vel}(m),\quad \alpha_t+\beta_t+\gamma_t=1,
+\end{align}
+donde $p_{\text{ent}},p_{\text{sal}}$ son precios de referencia en dólares por millón de tokens \parencite{openrouter2026} y $s_t$ es la longitud típica de respuesta de la tarea (800 tokens para estudiar, 600 para practicar y revisar). Los coeficientes reflejan qué importa en cada tarea: estudiar prioriza el contexto ($\alpha=0{,}5$), practicar la velocidad ($\gamma=0{,}5$) y revisar el razonamiento ($\beta=0{,}8$). La decisión es
+\begin{equation}
+m^{*}=\arg\min_{m:\,\{t,m\}\in E}\mathrm{costo}(t,m),\quad\text{y si hay empate, }\arg\max\, w(t,m).
+\end{equation}
+Es decir, \emph{el modelo más barato que cumple todas las condiciones}. La Figura~\ref{fig:bipartito} ilustra un caso.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[every node/.style={font=\small},
+  t/.style={draw, circle, fill=tinta!12, minimum size=0.8cm},
+  m/.style={draw, rounded corners, fill=gray!8, minimum width=4.4cm, minimum height=0.6cm, anchor=west}]
+\node[t] (t1) at (0,1.5) {E}; \node[t] (t2) at (0,0) {P}; \node[t] (t3) at (0,-1.5) {R};
+\node[m] (m1) at (5,2.1) {Gemma 4 26B \hfill \$0,08};
+\node[m] (m2) at (5,0.7) {gpt-oss-120b \hfill \$0,15};
+\node[m] (m3) at (5,-0.7) {Gemini 3.5 Flash \hfill \$1,50};
+\node[m, dashed, text=gray] (m4) at (5,-2.1) {Llama 3.3 70B \hfill GPQA 0,50};
+\foreach \t in {t1,t3} \foreach \m in {m1,m2,m3} \draw[gray!45] (\t.east) -- (\m.west);
+\draw (t2.east) -- (m2.west); \draw (t2.east) -- (m3.west);
+\draw[very thick, tinta] (t2.east) -- (m1.west);
+\node[font=\footnotesize\itshape, text=gray] at (0,-2.4) {tareas};
+\node[font=\footnotesize\itshape, text=gray] at (7.2,-2.75) {modelos (precio de entrada por millón de tokens)};
+\end{tikzpicture}
+\caption{Grafo bipartito tareas (E: estudiar, P: practicar, R: revisar) y modelos. Para una pregunta de práctica con cálculo, Llama 3.3 no es apto (no alcanza el razonamiento mínimo: no tiene aristas) y la arista elegida (gruesa) es la de menor costo.}\label{fig:bipartito}
+\end{figure}
+
+\subsection{Red de sustitución: respaldo con análisis de redes}
+Cuando el modelo elegido falla, hay que decidir con cuál seguir. Se construye una segunda red: los nodos son los modelos aptos y hay una arista $\{u,v\}$ si son \emph{intercambiables}, es decir, si son el mismo modelo base en distintos proveedores (por ejemplo, Gemma 4 31B en Google, NVIDIA y OpenRouter) o si $|\mathrm{GPQA}(u)-\mathrm{GPQA}(v)|\le 0{,}05$. Es no dirigida y no ponderada, y se guarda como lista de adyacencia \parencite{gomez2026grafos}. Sobre ella se calculan las tres medidas de la Unidad 4 \parencite{gomez2026redes,freeman1978}:
+\begin{equation}
+C_D(v)=\frac{\deg(v)}{n-1},\qquad H(v)=\frac{1}{n-1}\sum_{u\ne v}\frac{1}{d(v,u)},\qquad C_B(v)=\sum_{s<t,\ s,t\ne v}\frac{\sigma_{st}(v)}{\sigma_{st}}.
+\end{equation}
+Se usa la variante armónica de la cercanía, con la convención $1/\infty=0$, porque la red puede no ser conexa. La intermediación se calcula con el algoritmo de Brandes, que hace un BFS por vértice \parencite{brandes2001}.
+
+\textbf{Interpretación en el problema.} El orden de respaldo sigue las capas de BFS desde el elegido: primero sus sustitutos directos ($d=1$), luego los de $d=2$, y dentro de cada capa el más barato. Así, si el modelo falla, el estudiante continúa con el más parecido. $C_D$ del elegido mide cuántos respaldos equivalentes tiene (robustez de la decisión), y el nodo de mayor $C_B$ es el modelo \enquote{puente} entre grupos de calidad distinta.
+
+\textbf{Verificación con un caso de resultado conocido.} La implementación se probó con el grafo $R$ de los apuntes (aristas $AB, AC, BD, CD, DE, EF$). Obtuvo $d(A,F)=4$, diámetro 4, $C_D(D)=3/5$, $C_B(E)=4$ (los pares de $F$ con $A,B,C,D$ pasan por $E$), $C_B(D)=6{,}5$ (seis pares completos más la mitad del par $\{B,C\}$, que tiene dos geodésicas) y $\sum_v\deg(v)=12=2|E|$, en concordancia con el lema del apretón de manos \parencite{zuleta2026discretas}.
+
+\subsection{Crecimiento del contexto e inducción matemática}
+Las API de los modelos no guardan memoria: cada mensaje reenvía toda la conversación. Si cada mensaje tiene en promedio $t$ tokens, el $j$-ésimo envío cuesta $j\cdot t$.
+
+\textbf{Proposición.} El total de tokens enviados tras $n$ mensajes es $S(n)=\sum_{j=1}^{n} j\,t = t\,\dfrac{n(n+1)}{2}$.
+
+\textbf{Demostración por inducción} \parencite{zuleta2026discretas}. \emph{Caso base:} $S(1)=t=t\cdot\frac{1\cdot 2}{2}$. \emph{Paso inductivo:} si $S(k)=t\,\frac{k(k+1)}{2}$, entonces
+\[
+S(k+1)=S(k)+(k+1)t=t\,\frac{k(k+1)}{2}+t\,(k+1)=t\,\frac{(k+1)(k+2)}{2}.\qquad\blacksquare
+\]
+El costo crece de forma cuadrática. Con una \textbf{ventana deslizante} que reenvía solo los últimos $k$ mensajes, cada envío cuesta a lo más $k\,t$ y el total queda acotado por $n\,k\,t$, que es lineal en $n$. Además, el requisito de contexto se vuelve a evaluar en cada mensaje con el tamaño real de la conversación, para no saltar a un respaldo en el que ya no cabe.
+
+% ------------------------------------------------------------------ 4. Solución
+\section{Solución: algoritmos y datos}
+
+\subsection{Arquitectura del prototipo}
+El harness está escrito en Python usando solo la biblioteca estándar; la red neuronal y la red de sustitución están programadas desde cero. Un servidor local (solo en \texttt{127.0.0.1}) atiende una interfaz web que se abre como ventana de escritorio, y se distribuye como un único ejecutable. Los módulos son: \texttt{red\_neuronal.py} (perceptrón), \texttt{router.py} (requisitos mínimos y grafo bipartito), \texttt{redes.py} (BFS y centralidades), \texttt{cliente.py} (llamadas a las API) y \texttt{app.py} (servidor, ventana deslizante y respaldo). Todos los proveedores usan API compatibles con OpenAI, así que un único cliente sirve para OVHcloud (incluido, sin clave; \cite{ovh2026}), Google Gemini, NVIDIA NIM, Groq, Cerebras, Mistral, OpenRouter, DeepSeek (de pago) y cualquier proveedor personalizado que agregue el usuario.
+
+En el modo automático, la selección por costo y la clasificación de precisión se ejecutan una sola vez al crear el chat. En los mensajes siguientes se conserva el modelo activo mientras responda y cumpla la comprobación de contexto; si falla o el contexto resulta insuficiente, se avanza en la cadena de respaldo ya construida. No se vuelve a clasificar cada mensaje ni se recalcula la selección por costo durante ese chat.
+
+\begin{algorithm}[htbp]
+\caption{Elección del modelo al iniciar un chat}\label{alg:elegir}
+\begin{algorithmic}[1]
+\Require pregunta inicial $q$, material $a$, tipo $t$, interruptor $T$, catálogo $M$
+\Ensure modelo elegido $m^{*}$ y cadena de respaldo
+\State $C\gets$ verdadero si $\mathrm{RedNeuronal}(q,a)\ge 0{,}5$ o si $T$ está activo
+\State $A\gets\{m\in M: m\text{ es apto}\}$ \Comment{requisitos mínimos}
+\State ordenar $A$ por $(\mathrm{costo}(t,m),\,-w(t,m))$ \Comment{grafo bipartito}
+\State $m^{*}\gets$ primer elemento de $A$
+\State $G\gets$ red de sustitución sobre $A$; \ $d\gets\mathrm{BFS}(G,m^{*})$
+\State respaldo $\gets A\setminus\{m^{*}\}$ ordenado por $(d(m^{*},m),\,\mathrm{costo})$
+\State \Return $m^{*}$, respaldo
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[htbp]
+\caption{Envío de un mensaje con respaldo}\label{alg:enviar}
+\begin{algorithmic}[1]
+\Require conversación $H$, cadena $[m_1,\dots,m_r]$
+\State $H'\gets$ instrucciones $+$ material $+$ últimos $k$ mensajes de $H$ \Comment{ventana deslizante}
+\While{la cadena no esté vacía}
+  \State $m\gets$ primero de la cadena
+  \If{$\mathrm{ctx}(m)<1{,}2\cdot\mathrm{tokens}(H')$} quitar $m$ y avisar \Comment{contexto revisado}
+  \ElsIf{la API de $m$ responde} registrar tokens cobrados y costo; \Return respuesta
+  \Else{} quitar $m$ (cupo agotado, saturado o sin respuesta a tiempo) y avisar
+  \EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Terminación.} Cada iteración del ciclo del Algoritmo~\ref{alg:enviar} o responde o elimina un elemento de la cadena. Por inducción sobre la longitud $r$ de la cadena, el ciclo termina en a lo más $r$ iteraciones: con $r=0$ no entra, y si termina para $r$, con $r+1$ la primera iteración responde o reduce la cadena a longitud $r$.
+
+El código fuente, las instrucciones de ejecución y los resultados del experimento están disponibles en el repositorio del proyecto: \url{https://github.com/Jlang27/harness-educativo}.
+
+\subsection{Datos}
+\begin{itemize}[nosep]
+  \item \textbf{Catálogo de modelos} (\texttt{modelos.json}): 22 entradas de 7 proveedores, con ventana de contexto, puntaje de razonamiento y precios de referencia de OpenRouter, consultados el 16 de noviembre de 2026 \parencite{openrouter2026}. Catorce entradas citan un reporte público o agregador para GPQA Diamond; ocho usan un puntaje estimado, indicado en el campo de fuente. Una estimación no equivale a una medición publicada.
+  \item \textbf{Datos en vivo:} al iniciar, el harness consulta a cada proveedor qué modelos ofrece y su contexto real. Los modelos que no están en el catálogo entran como \enquote{sin evaluar}, con GPQA 0,5, por lo que nunca pasan el requisito de razonamiento hasta que alguien los califique.
+  \item \textbf{Entrenamiento de la red neuronal:} 84 preguntas de diversas materias, etiquetadas a mano.
+  \item \textbf{Experimento:} 20 ejercicios con respuesta conocida, tomados de los apuntes del curso: lema del apretón de manos, grafos regulares, $K_5$ y $K_{3,3}$, fórmula de Euler, Königsberg, distancias y centralidades del grafo $R$, árbol de expansión mínimo, inducción y conceptos de BFS y DFS \parencite{gomez2026grafos,gomez2026redes,zuleta2026discretas}.
+\end{itemize}
+
+\subsection{Pruebas}
+El prototipo tiene 25 pruebas automáticas con resultados conocidos, entre ellas: las distancias y centralidades del grafo $R$; el lema del apretón de manos; que la regla elige el apto más barato y que un costo calculado a mano coincida; que la red neuronal clasifica correctamente frases que no vio en el entrenamiento; que sin ventana el número de mensajes enviados es exactamente $n(n+1)/2$ y con ventana crece linealmente; y que el respaldo salta al siguiente modelo cuando una API simulada responde \enquote{cupo agotado} (código 429).
+
+% ------------------------------------------------------------------ 5. Resultados
+\section{Resultados e interpretación}\label{sec:resultados}
+
+\subsection{Diseño del experimento}
+Se compararon tres estrategias sobre los 20 ejercicios, con las API reales y las claves gratuitas del equipo: (a) \textbf{siempre el más potente}, el modelo disponible con mayor puntaje de razonamiento del catálogo (Gemini 3.5 Flash); (b) \textbf{al azar}, un modelo disponible del catálogo elegido al azar; y (c) \textbf{el harness}. Cada ejercicio del harness abrió un chat nuevo. Se pidió terminar con \enquote{RESPUESTA FINAL: \ldots} y un calificador automático comparó la respuesta final con la conocida. El programa usa los tokens reportados por la API cuando están disponibles y una estimación por longitud en caso contrario; los archivos guardados no distinguen ambos casos. El costo se calculó a precios de referencia y no representa un cobro efectivo al equipo.
+
+Los resultados guardados corresponden a la versión anterior a la red de sustitución: el respaldo se ordenaba por costo. Por ello, este experimento no evalúa específicamente el orden por BFS de la versión actual. La continuidad ante una falla 429 se verifica de forma independiente mediante la API simulada descrita en las pruebas.
+
+\subsection{Resultados}
+\begin{table}[htbp]
+\caption{Resultados del experimento con 20 ejercicios de respuesta conocida}\label{tab:resultados}
+\small
+\begin{tabularx}{\textwidth}{Xcccc}
+\toprule
+\textbf{Estrategia} & \textbf{Aciertos} & \textbf{Cortes} & \textbf{Tokens} & \shortstack{\textbf{Costo ref.}\\\textbf{(US\$)}} \\
+\midrule
+Siempre el más potente & 17/20 & 3 & 3\,943 & 0,02906 \\
+Al azar (entre calificados) & 20/20 & 0 & 8\,587 & 0,01092 \\
+\textbf{Harness} & \textbf{20/20} & \textbf{0} & 12\,357 & \textbf{0,00436} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El harness usó Gemma 4 26B en 12 ejercicios, gpt-oss-120b en 6 y Gemma 4 31B en 2. Al aplicar el clasificador a las preguntas del banco, 19 de las 20 superan el umbral de precisión; la excepción es la pregunta conceptual sobre la estructura que usa DFS. Estos datos describen una sola ejecución del experimento.
+
+\subsection{Interpretación}
+\begin{enumerate}[nosep]
+  \item \textbf{Costo de referencia:} el del harness fue el 15\,\% de la estrategia del más potente (ahorro estimado del 85\,\%, factor de 6,7) y el 40\,\% de la estrategia al azar, \emph{con más tokens}. La comparación ilustra el efecto de elegir modelos con menor precio por token; no mide ahorro monetario efectivo ni demuestra por sí sola viabilidad institucional.
+  \item \textbf{Confiabilidad observada:} el harness acertó los 20 ejercicios; el modelo más potente acertó los 17 que respondió. En esta ejecución no se observaron respuestas incorrectas entre las respuestas recibidas. El filtro GPQA es un criterio aproximado y no garantiza precisión fuera de este banco.
+  \item \textbf{Continuidad observada:} la estrategia del más potente tuvo 3 cortes (ejercicios 17, 19 y 20) y el harness ninguno. Los archivos guardados no registran la causa exacta de los cortes ni todos los intentos de respaldo, por lo que no permiten atribuir la diferencia a fallas concretas absorbidas por la cadena.
+  \item \textbf{Alcance:} la estrategia al azar también acertó 20 de 20. Los resultados muestran menor costo de referencia y cero cortes para el harness en esta ejecución; no prueban superioridad general en precisión ni evalúan el respaldo por BFS incorporado después.
+\end{enumerate}
+
+\textbf{Ejemplo de la red de sustitución.} Para una pregunta de práctica con cálculo, con las claves del equipo, la red tuvo 8 modelos aptos, 18 aristas y 2 componentes conexas. El elegido tuvo 5 sustitutos directos ($C_D=0{,}714$, $H=0{,}786$), lo que indica una decisión robusta: si falla, hay cinco reemplazos de calidad equivalente a distancia 1.
+
+% ------------------------------------------------------------------ 6. Conclusiones
+\section{Conclusiones y limitaciones}
+
+La teoría del curso permitió convertir la selección inicial de un modelo en un procedimiento explícito y verificable. Al iniciar el chat, la red neuronal estima cuánta precisión hace falta a partir de su entrada inicial, los requisitos mínimos filtran los candidatos y el grafo bipartito ponderado selecciona el modelo apto más barato. El análisis de redes ordena el respaldo y mide su conectividad, mientras que la inducción justifica controlar el crecimiento de la conversación. En el experimento guardado, realizado antes del respaldo por BFS, el harness obtuvo 20/20 aciertos, cero cortes y un costo de referencia 6,7 veces menor que la estrategia del modelo más potente. Estos resultados son preliminares y no garantizan el mismo desempeño en otras materias o condiciones de acceso. La interfaz explica la elección, permite adjuntar PDF con texto y archivos Word, y recomienda claves gratuitas cuando identifica alternativas de mayor calidad estimada.
+
+\textbf{Limitaciones.}
+\begin{itemize}[nosep]
+  \item Los puntajes GPQA vienen de agregadores que a veces discrepan, y ocho son estimados. GPQA mide razonamiento científico, que es solo una aproximación de la calidad para estudiar.
+  \item El experimento usa 20 ejercicios de dificultad moderada y una sola ejecución. Una evaluación más fuerte requiere más ejercicios, más materias, repeticiones e instrucciones equivalentes para las tres estrategias.
+  \item La red neuronal se entrenó con solo 84 ejemplos y puede clasificar incorrectamente preguntas nuevas. Detectar cálculo donde no lo hay puede encarecer la selección; no detectarlo cuando sí lo hay puede reducir el rigor exigido.
+  \item El calificador automático compara números y palabras de la respuesta final, pero puede aceptar expresiones ambiguas o contradictorias. Se requiere una validación más estricta y conservar las respuestas completas en futuros experimentos.
+  \item La ventana deslizante descarta los mensajes viejos sin resumirlos.
+  \item La clasificación de precisión y la selección por costo se realizan solo al iniciar el chat. Si la conversación cambia de una tarea conceptual a una de cálculo, esos criterios no se actualizan; se debe iniciar un chat nuevo para obtener una selección acorde con la nueva tarea.
+  \item Los cupos gratuitos cambian sin aviso y el acceso sin clave de OVHcloud se comparte por dirección IP. El catálogo debe actualizarse periódicamente.
+  \item El experimento se ejecutó antes de incorporar la red de sustitución, con el respaldo ordenado solo por costo. La selección inicial usa la misma regla, pero el orden de respaldo sí cambia. Las aristas situadas exactamente en el umbral de 0,05 también pueden verse afectadas por el redondeo de punto flotante.
+\end{itemize}
+
+\textbf{Trabajo futuro:} calificar automáticamente los modelos descubiertos usando el propio experimento, resumir el historial con un modelo barato y validar el prototipo con estudiantes reales de varias carreras, midiendo tiempo de estudio y satisfacción.
+
+% ------------------------------------------------------------------ 7. Referencias
+\newpage
+\printbibliography[title={Referencias}]
+
+\end{document}
